@@ -45,8 +45,11 @@ void setup() {
   WiFi.begin(ssid, password);
  
   while (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(ledPin, LOW);
     delay(500);
     Serial.print(".");
+    digitalWrite(ledPin, HIGH);
+    delay(500);
   }
   Serial.println("");
   Serial.println("WiFi connected");
@@ -84,6 +87,10 @@ void SendTweet(float temperatura, float humitat) {
   
 
   Serial.println("\nStarting connection to server...");
+  digitalWrite(ledPin, LOW);
+  delay(500);
+  digitalWrite(ledPin, HIGH);
+  
   // if you get a connection, report back via serial:
   if (clientWeb.connect(tweet, 80)) 
   {
@@ -102,82 +109,89 @@ void SendTweet(float temperatura, float humitat) {
     clientWeb.print("\n\n");
 
     clientWeb.print(PostData);
-    
+    // Data sended
+    digitalWrite(ledPin, LOW);
+    delay(500);
+    digitalWrite(ledPin, HIGH);
   }
   
 }
  
 void loop() {
 
-   if (WiFi.status() != WL_CONNECTED)
-    {
-      WiFi.mode(WIFI_STA);
-      WiFi.begin(ssid, password);
-     
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-      }
-      Serial.println("");
-      Serial.println("WiFi connected");
-      WiFi.hostname("Node");
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    
+    while (WiFi.status() != WL_CONNECTED) {
+      digitalWrite(ledPin, LOW);
+      delay(500);
+      Serial.print(".");
+      digitalWrite(ledPin, HIGH);
+      delay(500);
     }
-
-  // RONDA 1
-  float temp1 = dht1.readTemperature();
-  while(isnan(temp1))
-  {
-    delay(50);
-    temp1 = dht1.readTemperature();
+    Serial.println("");
+    Serial.println("WiFi connected");
+    WiFi.hostname("Node");
   }
-  delay(30);
-  float hum1 = dht1.readHumidity();
-  while(isnan(hum1))
+  else
   {
-    delay(50);
-    hum1 = dht1.readHumidity();
-  }  
-  delay(1000 * 60 * 5);
-
-  // RONDA 2
-  float temp2 = dht1.readTemperature();
-  while(isnan(temp2))
-  {
-    delay(50);
-    temp2 = dht1.readTemperature();
+      // RONDA 1
+      float temp1 = dht1.readTemperature();
+      while(isnan(temp1))
+      {
+        delay(50);
+        temp1 = dht1.readTemperature();
+      }
+      delay(30);
+      float hum1 = dht1.readHumidity();
+      while(isnan(hum1))
+      {
+        delay(50);
+        hum1 = dht1.readHumidity();
+      }  
+      delay(1000 * 60 * 5);
+    
+      // RONDA 2
+      float temp2 = dht1.readTemperature();
+      while(isnan(temp2))
+      {
+        delay(50);
+        temp2 = dht1.readTemperature();
+      }
+      delay(30);
+      float hum2 = dht1.readHumidity();
+      while(isnan(hum2))
+      {
+        delay(50);
+        hum2 = dht1.readHumidity();
+      }    
+      delay(1000 * 60 * 5);
+    
+      // RONDA 3
+      float temp3 = dht1.readTemperature();
+      while(isnan(temp3))
+      {
+        delay(50);
+        temp3 = dht1.readTemperature();
+      }  
+      delay(30);
+      float hum3 = dht1.readHumidity();
+      while(isnan(hum3))
+      {
+        delay(50);
+        hum3 = dht1.readHumidity();
+      }    
+      delay(1000 * 60 * 5);
+    
+      // Calcul mitjana
+      float temp = ( temp1 + temp2 + temp3 ) / 3;
+      float hum = ( hum1 + hum2 + hum3 ) / 3;
+      
+      // Send tweet
+      SendTweet(temp, hum);
   }
-  delay(30);
-  float hum2 = dht1.readHumidity();
-  while(isnan(hum2))
-  {
-    delay(50);
-    hum2 = dht1.readHumidity();
-  }    
-  delay(1000 * 60 * 5);
-
-  // RONDA 3
-  float temp3 = dht1.readTemperature();
-  while(isnan(temp3))
-  {
-    delay(50);
-    temp3 = dht1.readTemperature();
-  }  
-  delay(30);
-  float hum3 = dht1.readHumidity();
-  while(isnan(hum3))
-  {
-    delay(50);
-    hum3 = dht1.readHumidity();
-  }    
-  delay(1000 * 60 * 5);
-
-  // Calcul mitjana
-  float temp = ( temp1 + temp2 + temp3 ) / 3;
-  float hum = ( hum1 + hum2 + hum3 ) / 3;
-  
-  // Send tweet
-  SendTweet(temp, hum);
-
 
  
 }
